@@ -17,6 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.registropersonascompose.ui.theme.RegistroPersonasComposeTheme
 
 var selectedOcupacion: String? = null
@@ -39,10 +43,21 @@ fun MyApp() {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
-        //ConsultaPersonasScreen()
-        RegistroPersonasScreen()
-        //RegistroOcupacionesScreen()
-        //ConsultaOcupacionesScreen()
+        val navController = rememberNavController()
+        NavHost(navController = navController, startDestination = "ConsultaPersona") {
+            composable("ConsultaPersona") {
+                ConsultaPersonasScreen(navController = navController)
+            }
+            composable("RegistroPersona") {
+                RegistroPersonasScreen(navController = navController)
+            }
+            composable("ConsultaOcupacion") {
+                ConsultaOcupacionesScreen(navController = navController)
+            }
+            composable("RegistroOcupacion") {
+                RegistroOcupacionesScreen(navController = navController)
+            }
+        }
     }
 }
 
@@ -66,76 +81,114 @@ fun RowPersonas(nombre: String) {
 }
 
 @Composable
-fun ConsultaPersonasScreen() {
-    Column(modifier = Modifier.padding(16.dp)) {
-
-        val listNombres = listOf("Nachely", "Alvaro", "Vismar", "Felix")
-
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(listNombres) { nombre ->
-                RowPersonas(nombre = nombre)
+fun ConsultaPersonasScreen(navController: NavHostController) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Consulta de Personas") }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate("RegistroPersona") }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
-        }
-        Button(onClick = {/*TODO*/ }) {
-            Text(text = "Ocupaciones")
-        }
+        },
+        floatingActionButtonPosition = FabPosition.End
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+
+            val listNombres = listOf("Nachely", "Alvaro", "Vismar", "Felix")
+
+            Button(onClick = { navController.navigate("ConsultaOcupacion") }) {
+                Text(text = "Ocupaciones")
+            }
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(listNombres) { nombre ->
+                    RowPersonas(nombre = nombre)
+                }
+            }
 
 
+        }
     }
+
 
 }
 
 @Composable
-fun RegistroPersonasScreen() {
+fun RegistroPersonasScreen(navController: NavHostController) {
     val ListaOcupaciones = listOf("Estudiante", "Profesor", "Administrativo", "Ingeniero")
-    Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = "",
-            label = { Text(text = "Nombres") },
-            onValueChange = { /*TODO*/ },
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Person, contentDescription = null)
-            }
-        )
-        OutlinedTextField(
-            value = "",
-            label = { Text(text = "Email") },
-            onValueChange = { /*TODO*/ },
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Email, contentDescription = null)
-            }
-        )
-        OcupacionesSpinner(ocupacion = ListaOcupaciones)
-        OutlinedTextField(
-            value = "",
-            label = { Text(text = "Salario") },
-            onValueChange = { /*TODO*/ },
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.ShoppingCart, contentDescription = null)
-            }
-        )
-        Row(Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.width(20.dp))
-            Button(onClick = { /*TODO*/ }) {
-                Modifier.padding(8.dp)
-                Text(text = "Nuevo")
-            }
-            Spacer(modifier = Modifier.width(20.dp))
-            Button(onClick = {/*TODO*/ }) {
-                Modifier.padding(8.dp)
-                Text(text = "Guardar")
-            }
-            Spacer(modifier = Modifier.width(20.dp))
-            Button(onClick = {/*TODO*/ }) {
-                Modifier.padding(8.dp)
-                Text(text = "Eliminar")
-            }
-        }
 
+    var person by rememberSaveable() {
+        mutableStateOf("")
     }
+    var nombre by rememberSaveable() {
+        mutableStateOf("")
+    }
+    var ite by rememberSaveable() {
+        mutableStateOf("")
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Registro de Personas") }
+            )
+        }
+    ) {
+
+        Column(modifier = Modifier.padding(16.dp)) {
+            OutlinedTextField(
+                value = person,
+                label = { Text(text = "Nombres") },
+                onValueChange = { person = it },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Person, contentDescription = null)
+                }
+            )
+            OutlinedTextField(
+                value = nombre,
+                label = { Text(text = "Email") },
+                onValueChange = { nombre = it },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Email, contentDescription = null)
+                }
+            )
+            OcupacionesSpinner(ocupacion = ListaOcupaciones)
+            OutlinedTextField(
+                value = ite,
+                label = { Text(text = "Salario") },
+                onValueChange = {ite = it},
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.ShoppingCart, contentDescription = null)
+                }
+            )
+            Row(Modifier.padding(16.dp)) {
+                Spacer(modifier = Modifier.width(20.dp))
+                Button(onClick = { /*TODO*/ }) {
+                    Modifier.padding(8.dp)
+                    Text(text = "Nuevo")
+                }
+                Spacer(modifier = Modifier.width(20.dp))
+                Button(onClick = { navController.navigate("ConsultaPersona") }) {
+                    Modifier.padding(8.dp)
+                    Text(text = "Guardar")
+                }
+                Spacer(modifier = Modifier.width(20.dp))
+                Button(onClick = {/*TODO*/ }) {
+                    Modifier.padding(8.dp)
+                    Text(text = "Eliminar")
+                }
+            }
+
+
+        }
+    }
+
+
 }
 
 @Composable
@@ -175,72 +228,91 @@ fun OcupacionesSpinner(ocupacion: List<String>) {
 }
 
 @Composable
-fun ConsultaOcupacionesScreen() {
-    Column(modifier = Modifier.padding(16.dp)) {
+fun ConsultaOcupacionesScreen(navController: NavHostController) {
 
-        val listNombres = listOf("Nachely", "Alvaro", "Vismar", "Felix")
-
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(listNombres) { nombre ->
-                RowPersonas(nombre = nombre)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Consulta de Ocupaciones") }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate("RegistroOcupacion") }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
-        }
-        Scaffold(
-            floatingActionButton = {
-                FloatingActionButton(onClick = {/*TODO*/ }) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
+        },
+        floatingActionButtonPosition = FabPosition.End
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+
+            val listNombres = listOf("Estudiante", "Profesor", "Administrativo", "Ingeniero")
+
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(listNombres) { nombre ->
+                    RowPersonas(nombre = nombre)
                 }
-            },
-            floatingActionButtonPosition = FabPosition.End
-        ) {
+            }
 
         }
-
     }
+
 }
 
 @Composable
-fun RegistroOcupacionesScreen() {
+fun RegistroOcupacionesScreen(navController: NavHostController) {
 
-    var person by rememberSaveable(){
+    var person by rememberSaveable() {
+        mutableStateOf("")
+    }
+    var nombre by rememberSaveable() {
         mutableStateOf("")
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = person,
-            label = { Text(text = "Id Ocupacion") },
-            onValueChange = { person = it },
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Person, contentDescription = null)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Registro de Ocupaciones") }
+            )
+        }
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            OutlinedTextField(
+                value = person,
+                label = { Text(text = "Id Ocupacion") },
+                onValueChange = { person = it },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Person, contentDescription = null)
+                }
+            )
+            OutlinedTextField(
+                value = nombre,
+                label = { Text(text = "Nombre") },
+                onValueChange = { nombre = it },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Person, contentDescription = null)
+                }
+            )
+            Row(Modifier.padding(16.dp)) {
+                Spacer(modifier = Modifier.width(20.dp))
+                Button(onClick = { /*TODO*/ }) {
+                    Modifier.padding(8.dp)
+                    Text(text = "Nuevo")
+                }
+                Spacer(modifier = Modifier.width(20.dp))
+                Button(onClick = { navController.navigate("ConsultaOcupacion") }) {
+                    Modifier.padding(8.dp)
+                    Text(text = "Guardar")
+                }
+                Spacer(modifier = Modifier.width(20.dp))
+                Button(onClick = {/*TODO*/ }) {
+                    Modifier.padding(8.dp)
+                    Text(text = "Eliminar")
+                }
             }
-        )
-        OutlinedTextField(
-            value = person,
-            label = { Text(text = "Nombre") },
-            onValueChange = { person = it },
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Person, contentDescription = null)
-            }
-        )
-        Row(Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.width(20.dp))
-            Button(onClick = { /*TODO*/ }) {
-                Modifier.padding(8.dp)
-                Text(text = "Nuevo")
-            }
-            Spacer(modifier = Modifier.width(20.dp))
-            Button(onClick = {/*TODO*/ }) {
-                Modifier.padding(8.dp)
-                Text(text = "Guardar")
-            }
-            Spacer(modifier = Modifier.width(20.dp))
-            Button(onClick = {/*TODO*/ }) {
-                Modifier.padding(8.dp)
-                Text(text = "Eliminar")
-            }
+
         }
     }
+
 }
